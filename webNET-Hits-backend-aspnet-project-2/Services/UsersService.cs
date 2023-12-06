@@ -1,4 +1,5 @@
-﻿using System.Net.Mail;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 using webNET_Hits_backend_aspnet_project_2.Models.EnumModels;
 using webNET_Hits_backend_aspnet_project_2.Models.InputModels;
@@ -101,6 +102,53 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             string phoneNumberPattern = @"^(\+7)[\s(]*\d{3}[)\s]*\d{3}[\s-]?\d{2}[\s-]?\d{2}$";
 
             return Regex.IsMatch(phoneNumber, phoneNumberPattern);
+        }
+
+        public UserData? RegisterUser(UserRegisterModel user)
+        {
+            Guid userId = Guid.NewGuid();
+            UserData fullUser = new UserData
+            {
+                Id = userId,
+                CreateTime = DateTime.UtcNow,
+                FullName = user.FullName,
+                BirthDate = user.BirthDate,
+                Gender = user.Gender,
+                Email = user.Email,
+                PhoneNumber = ConvertPhoneNumberToDatabaseFormat(user.PhoneNumber)
+            };
+
+            string hashedPassword = HashPassword(user.Password);
+
+            PasswordModel userPassword = new PasswordModel
+            {
+                UserId = userId,
+                HashedPassword = hashedPassword
+            };
+
+            _dbContext.Users.Add(fullUser);
+            _dbContext.UserPasswords.Add(userPassword);
+            _dbContext.SaveChanges();
+
+            return fullUser;
+        }
+
+        private string HashPassword(string password)
+        {
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+
+            // Хеширование пароля с использованием соли
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, salt);
+
+            return hashedPassword;
+        }
+
+        public string ConvertPhoneNumberToDatabaseFormat(string phoneNumber)
+        {
+            // Удаляем все символы, кроме цифр
+            string cleanedPhoneNumber = Regex.Replace(phoneNumber, @"\D", "");
+
+            return cleanedPhoneNumber;
         }
     }
 }
