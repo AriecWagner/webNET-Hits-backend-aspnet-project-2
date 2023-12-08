@@ -10,7 +10,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Data
         public DbSet<PasswordModel> UserPasswords { get; set; }
         public DbSet<PostData> Posts { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<TagsPostsJoinTable> TagsPostsJoinTable { get; set; }
+        public DbSet<TagPostJoin> TagsPostsJoinTable { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
