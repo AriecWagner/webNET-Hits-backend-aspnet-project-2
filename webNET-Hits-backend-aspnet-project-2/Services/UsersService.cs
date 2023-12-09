@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using webNET_Hits_backend_aspnet_project_2.Models.EnumModels;
@@ -8,6 +9,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public class UsersService
     {
+        private readonly AppDbContext _dbContext;
+
+        public UsersService(AppDbContext context)
+        {
+            _dbContext = context;
+        }
 
         public bool FUllNameIsValid(string name)
         {
@@ -18,6 +25,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             // Проверяем, что есть хотя бы три части (фамилия, имя, отчество) и каждая часть состоит из букв
             return nameParts.Length == 3 && nameParts.All(part => part.All(char.IsLetter));
         }
+
         public bool PasswordIsValid(string password, out string ErrorMessage)
         {
             var input = password;
@@ -114,7 +122,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return Regex.IsMatch(phoneNumber, phoneNumberPattern);
         }
 
-        public UserData? RegisterUser(UserRegisterModel user)
+        public UserData? RegisterUser(InputUserRegisterModel user)
         {
             Guid userId = Guid.NewGuid();
             UserData fullUser = new UserData
@@ -151,6 +159,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, salt);
 
             return hashedPassword;
+        }
+
+        public bool VerifyPassword(string password, string hashedPassword)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
         }
 
         public string ConvertPhoneNumberToDatabaseFormat(string phoneNumber)
