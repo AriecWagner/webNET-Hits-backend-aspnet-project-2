@@ -245,6 +245,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext.Tokens.Update(currentToken);
             _dbContext.SaveChanges();
         }
+
+        public UserData GetUser(Guid userId)
+        {
+            return _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+        }
     }
 
 }

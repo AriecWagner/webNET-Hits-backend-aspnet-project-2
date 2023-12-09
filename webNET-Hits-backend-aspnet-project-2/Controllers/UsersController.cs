@@ -182,5 +182,58 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 return StatusCode(500, "Произошла ошибка сервера" + "\n" + ex.ToString());
             }
         }
+
+        [HttpGet("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetProfile()
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                if (userId != null)
+                {
+                    var user = _userService.GetUser(userId);
+
+                    if (user != null)
+                    {
+                        var response = new
+                        {
+                            id = user.Id,
+                            createTime = user.CreateTime,
+                            fullName = user.FullName,
+                            birthDate = user.BirthDate,
+                            gender = user.Gender,
+                            email = user.Email,
+                            phoneNumber = user.PhoneNumber,
+                        };
+
+                        return Ok(response);
+                    }
+                    else
+                    {
+                        return NotFound("Пользователь не найден");
+                    }
+                }
+                else
+                {
+                    return NotFound("Где Id?");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
     }
 }
