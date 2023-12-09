@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-
+using webNET_Hits_backend_aspnet_project_2.Models.DbModels;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
 {
@@ -74,7 +74,9 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 }
 
                 AuthOptions authentification = new AuthOptions(_configuration);
-                var token = _tokenService.GenerateToken(user, authentification);
+                var newUser = _userService.RegisterUser(user);
+
+                var token = _tokenService.GenerateToken(newUser.Id, authentification);
 
                 if (token == null)
                 {
@@ -119,7 +121,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 AuthOptions authentification = new AuthOptions(_configuration);
 
-                var token = _tokenService.GenerateToken(user, authentification);
+                var token = _tokenService.GenerateToken(user.Id, authentification);
 
                 if (token == null)
                 {

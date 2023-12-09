@@ -3,7 +3,13 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using webNET_Hits_backend_aspnet_project_2.Data;
+using webNET_Hits_backend_aspnet_project_2.Models.DbModels;
 using webNET_Hits_backend_aspnet_project_2.Models.InputModels;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -16,18 +22,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext = context;
             _userService = userService;
         }
-        public string GenerateToken(InputUserRegisterModel userModel, AuthOptions authentification)
+        public string GenerateToken(Guid userId, AuthOptions authentification)
         {
-            var newUser = _userService.RegisterUser(userModel);
-
-            if (newUser == null)
+            if (userId == null)
             {
                 return null;
             }
 
             var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier,userId.ToString())
                 };
 
             var now = DateTime.UtcNow;
@@ -41,7 +45,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
 
-            CreateOrUpdateTokenInfo(newUser.Id, encodedJwt);
+            CreateOrUpdateTokenInfo(userId, encodedJwt);
 
             return encodedJwt;
         }
