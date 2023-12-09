@@ -151,5 +151,36 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 return StatusCode(500, "Произошла ошибка сервера" + "\n" + ex.ToString());
             }
         }
+
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult Logout()
+        {
+            try
+            {
+
+                // Получение идентификатора пользователя из токена
+                Guid userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                // Аннулирование токена для пользователя (в вашем методе сервиса)
+                _userService.RevokeToken(userId);
+
+                return Ok("Выход успешно выполнен");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера" + "\n" + ex.ToString());
+            }
+        }
     }
 }

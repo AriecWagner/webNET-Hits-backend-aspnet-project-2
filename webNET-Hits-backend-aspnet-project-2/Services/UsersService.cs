@@ -202,5 +202,49 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             return user;
         }
+
+        public bool CheckCurrentToken(Guid UserId)
+        {
+            TokenModel tokenInfo = _dbContext.Tokens.FirstOrDefault(u => u.UserId == UserId);
+
+            if (tokenInfo == null)
+            {
+                return false;
+            }
+
+            return tokenInfo.IsValid;
+        }
+
+        public bool IsUserAuthenticated(Guid userId, out string ErrorMessage)
+        {
+            ErrorMessage = string.Empty;
+            UserData user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                ErrorMessage = "Мы не нашли такого пользователя";
+                return false;
+            }
+
+            if (!CheckCurrentToken(userId))
+            {
+                ErrorMessage = "Вы не авторизованы";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public void RevokeToken(Guid userId)
+        {
+            TokenModel currentToken = _dbContext.Tokens.FirstOrDefault(t => t.UserId == userId);
+            //_dbContext.Tokens.Remove(currentToken);
+            currentToken.IsValid = false;
+            _dbContext.Tokens.Update(currentToken);
+            _dbContext.SaveChanges();
+        }
     }
+
 }
