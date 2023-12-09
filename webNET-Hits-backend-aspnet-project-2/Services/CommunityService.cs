@@ -15,7 +15,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             _dbContext = context;
         }
-        
-       
+
+        public List<CommunityMemberDTO> GetMembershipsUser(Guid userId)
+        {
+            List<CommunityMember> MembershipsUser = _dbContext.CommunityMembers.Where(c => c.UserId == userId).ToList();
+
+            List<CommunityMemberDTO> answer = MembershipsUser
+                .Select(MembershipsUser => new CommunityMemberDTO
+                {
+                    CommunityId = MembershipsUser.CommunityId,
+                    UserId = userId,
+                    Role = MembershipsUser.Role
+                })
+                .ToList();
+
+            return answer;
+        }
     }
 }
