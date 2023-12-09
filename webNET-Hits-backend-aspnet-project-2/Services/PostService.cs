@@ -280,5 +280,13 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext.Likes.Remove(currentLike);
             _dbContext.SaveChanges();
         }
+
+        public bool PostExests(Guid postId)
+        {
+            var answer = _dbContext.Posts.FirstOrDefault(item => item.Id == postId);
+
+            if (answer != null) { return true; }
+            else { return false; }
+        }
     }
 }
