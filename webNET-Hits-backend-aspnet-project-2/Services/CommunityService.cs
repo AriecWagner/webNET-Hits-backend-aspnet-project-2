@@ -170,6 +170,18 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return (posts, pagination);
         }
 
+        public CommunityRole? GetTheGreatestRole(Guid communityId, Guid userId)
+        {
+            var member = _dbContext.CommunityMembers.Where(c => c.UserId == userId && c.CommunityId == communityId).ToList();
+
+            bool isAdmin = member.Exists(m => m.Role == CommunityRole.Administrator);
+            bool isSubscriber = member.Exists(m => m.Role == CommunityRole.Subscriber);
+
+            if (isAdmin) return CommunityRole.Administrator;
+            if (isSubscriber) return CommunityRole.Subscriber;
+            return null;
+        }
+
         public List<CommunityMemberDTO> GetMembershipsUser(Guid userId)
         {
             List<CommunityMember> MembershipsUser = _dbContext.CommunityMembers.Where(c => c.UserId == userId).ToList();
@@ -194,6 +206,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             foreach (var community in communities)
             {
                 CommuniesDTO communiesDTO = new CommuniesDTO
+
+        public List<CommuntiesDTO> GetCommunities()
+        {
+            List<CommunityModel> communities = _dbContext.Communities.ToList();
+            List<CommuntiesDTO> result = new List<CommuntiesDTO>();
+
+            foreach (var community in communities)
+            {
+                CommuntiesDTO communiesDTO = new CommuntiesDTO
+GetCommunityInfEndpoint
                 {
                     Name = community.Name,
                     Description = community.Description,
@@ -209,5 +231,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return result;
         }
 
+        public int GetSubscribersCount(Guid communityId)
+        {
+            List<CommunityMember> members = _dbContext.CommunityMembers.Where(item => item.CommunityId == communityId && item.Role == CommunityRole.Subscriber).ToList();
+            return members.Count;
+        }
+ GetCommunityInfEndpoint
     }
 }
