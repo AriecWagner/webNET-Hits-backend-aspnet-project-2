@@ -42,7 +42,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return answer;
         }
 
-        public (List<PostsDTO>, Pagination) GetListOfAvalibleCommunityPosts(FilterOptionsCommunity filterOptions, Guid userId)
+        public (List<PostsDTO>, PaginationDTO) GetListOfAvalibleCommunityPosts(FilterOptionsCommunity filterOptions, Guid userId)
         {
             var query = _dbContext.Posts.AsQueryable();
 
@@ -149,7 +149,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 })
                 .ToList();
 
-            Pagination pagination = new Pagination
+            PaginationDTO pagination = new PaginationDTO
             {
                 Size = filterOptions.Size,
                 Count = count,

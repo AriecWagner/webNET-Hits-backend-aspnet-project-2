@@ -32,6 +32,31 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _tagService = tagService;
         }
 
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetInformationAboutCommunity(Guid id)
+        {
+            try
+            {
+                var community = _communityService.GetCommunityDTO(id);
+
+                if (community != null)
+                {
+                    return Ok(community);
+                }
+                else
+                {
+                    return NotFound("Что-то пошло не так");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
         [HttpGet("{id}/posts")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
