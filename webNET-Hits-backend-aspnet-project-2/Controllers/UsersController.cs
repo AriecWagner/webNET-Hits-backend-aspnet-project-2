@@ -93,36 +93,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             }
         }
 
-        private string GenerateToken(InputUserRegisterModel userModel, AuthOptions authentification)
-        {
-            var newUser = _userService.RegisterUser(userModel);
-
-            if (newUser == null)
-            {
-                return null;
-            }
-
-            var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString())
-                };
-
-            var now = DateTime.UtcNow;
-
-            var jwt = new JwtSecurityToken(
-                issuer: AuthOptions.ISSUER,
-                audience: AuthOptions.AUDIENCE,
-                notBefore: now,
-                claims: claims,
-                expires: now.Add(TimeSpan.FromMinutes(AuthOptions.LIFETIME)),
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-
-            _userService.CreateOrUpdateTokenInfo(newUser.Id, encodedJwt);
-
-            return encodedJwt;
-        }
-
         [HttpPost("login")]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]

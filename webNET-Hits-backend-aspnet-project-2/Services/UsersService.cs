@@ -9,11 +9,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public class UsersService
     {
-        private readonly AppDbContext _dbContext;
 
-        public UsersService(AppDbContext context)
+        private readonly TokenService _tokenService;
+        readonly AppDbContext _dbContext;
+
+        public UsersService(AppDbContext context, TokenService tokenService)
         {
             _dbContext = context;
+            _tokenService = tokenService;
         }
 
         public bool FUllNameIsValid(string name)
@@ -174,34 +177,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return cleanedPhoneNumber;
         }
 
-        public void CreateOrUpdateTokenInfo(Guid UserId, string token)
-        {
-            TokenModel tokenInfo = _dbContext.Tokens.FirstOrDefault(x => x.UserId == UserId);
-
-            if (tokenInfo == null)
-            {
-                tokenInfo = new TokenModel
-                {
-                    UserId = UserId,
-                    Token = token,
-                    CreateTime = DateTime.UtcNow,
-                    IsValid = true,
-                };
-
-                _dbContext.Tokens.Add(tokenInfo);
-                _dbContext.SaveChanges();
-            }
-            else
-            {
-                tokenInfo.Token = token;
-                tokenInfo.CreateTime = DateTime.UtcNow;
-                tokenInfo.IsValid = true;
-
-                _dbContext.Tokens.Update(tokenInfo);
-                _dbContext.SaveChanges();
-            }
-        }
-
         public UserData Authenticate(string email, string password)
         {
             UserData user = _dbContext.Users.SingleOrDefault(currentUser => currentUser.Email == email);
@@ -226,18 +201,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return user;
         }
 
-        public bool CheckCurrentToken(Guid UserId)
-        {
-            TokenModel tokenInfo = _dbContext.Tokens.FirstOrDefault(u => u.UserId == UserId);
-
-            if (tokenInfo == null)
-            {
-                return false;
-            }
-
-            return tokenInfo.IsValid;
-        }
-
         public bool IsUserAuthenticated(Guid userId, out string ErrorMessage)
         {
             ErrorMessage = string.Empty;
@@ -249,7 +212,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 return false;
             }
 
-            if (!CheckCurrentToken(userId))
+            if (!_tokenService.CheckCurrentToken(userId))
             {
                 ErrorMessage = "Вы не авторизованы";
                 return false;
@@ -258,15 +221,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             {
                 return true;
             }
-        }
-
-        public void RevokeToken(Guid userId)
-        {
-            TokenModel currentToken = _dbContext.Tokens.FirstOrDefault(t => t.UserId == userId);
-            //_dbContext.Tokens.Remove(currentToken);
-            currentToken.IsValid = false;
-            _dbContext.Tokens.Update(currentToken);
-            _dbContext.SaveChanges();
         }
 
         public UserData GetUser(Guid userId)
