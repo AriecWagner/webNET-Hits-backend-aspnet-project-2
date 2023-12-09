@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using backtestDevelop.Data;
-using backtestDevelop.Models.AnotherModels;
-using backtestDevelop.Models.DbModels;
-using backtestDevelop.Models.EnumModels;
+using webNET_Hits_backend_aspnet_project_2.Data;
+using webNET_Hits_backend_aspnet_project_2.Models.DbModels;
+using webNET_Hits_backend_aspnet_project_2.Models.EnumModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace backtestDevelop.Services
