@@ -41,7 +41,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             { "17", "Машиноместо" }
         };
 
-        public List<SearchAddressModelDTO>? SearchAddress(long parent, string? query)
+        public List<AddressDTO>? SearchAddress(long parent, string? query)
         {
             if (query != null)
             {
@@ -57,7 +57,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 .Where(item => item.isactual == 1 && item.isactive == 1 && childrenElements.Select(c => c.objectid).Contains(item.objectid))
                 .ToList();
 
-            List<SearchAddressModelDTO> addresses = new List<SearchAddressModelDTO>();
+            List<AddressDTO> addresses = new List<AddressDTO>();
 
             foreach (AsAdmHierarchy childElement in childrenElements)
             {
@@ -66,7 +66,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 {
                     if (checkQuery(address.name, query) || checkQuery(address.typename, query))
                     {
-                        addresses.Add(new SearchAddressModelDTO
+                        addresses.Add(new AddressDTO
                         {
                             ObjectId = address.objectid,
                             ObjectGuid = address.objectguid,
@@ -82,7 +82,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 {
                     if (checkQuery(house.housenum, query))
                     {
-                        addresses.Add(new SearchAddressModelDTO
+                        addresses.Add(new AddressDTO
                         {
                             ObjectId = house.objectid,
                             ObjectGuid = house.objectguid,
@@ -116,6 +116,90 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             AsAddrObj address = asAddrObjTable.FirstOrDefault(h => h.objectid == id);
 
             return house != null ? "Здание (Строение)" : typeMappingsObjectText[address.level];
+        }
+
+        public List<AddressDTO> SearchAddressChain(Guid objectGuid)
+        {
+            List<AddressDTO> addresses = new List<AddressDTO>();
+            AsAddrObj maybeCurrentAddress = _dbContext.as_addr_obj.FirstOrDefault(addr => addr.objectguid == objectGuid);
+            AsAdmHierarchy hierarchy = new AsAdmHierarchy();
+
+            if (maybeCurrentAddress != null)
+            {
+                hierarchy = _dbContext.as_adm_hierarchy.FirstOrDefault(h => h.objectid == maybeCurrentAddress.objectid);
+                asAddrObjTable.Add(maybeCurrentAddress);
+                addresses.Add(new AddressDTO
+                {
+                    ObjectId = maybeCurrentAddress.objectid,
+                    ObjectGuid = maybeCurrentAddress.objectguid,
+                    Text = maybeCurrentAddress.name,
+                    ObjectLevel = getObjLevel(hierarchy.objectid),
+                    ObjectLevelText = getObjLevelText(hierarchy.objectid)
+                });
+            }
+            else
+            {
+                AsHouses currentHouse = _dbContext.as_houses.FirstOrDefault(ho => ho.objectguid == objectGuid);
+                AsHousesTable.Add(currentHouse);
+                hierarchy = _dbContext.as_adm_hierarchy.FirstOrDefault(h => h.objectid == currentHouse.objectid);
+                addresses.Add(new AddressDTO
+                {
+                    ObjectId = currentHouse.objectid,
+                    ObjectGuid = currentHouse.objectguid,
+                    Text = currentHouse.housenum,
+                    ObjectLevel = getObjLevel(hierarchy.objectid),
+                    ObjectLevelText = getObjLevelText(hierarchy.objectid)
+                });
+            }
+
+
+
+            while (hierarchy != null)
+            {
+                long parentid = hierarchy.parentobjid;
+                hierarchy = _dbContext.as_adm_hierarchy.FirstOrDefault(h => h.objectid == parentid);
+
+                if (hierarchy != null)
+                {
+                    AsAddrObj currentAddress = _dbContext.as_addr_obj.FirstOrDefault(h => h.objectid == hierarchy.objectid);
+                    asAddrObjTable.Add(currentAddress);
+
+                    addresses.Add(new AddressDTO
+                    {
+                        ObjectId = currentAddress.objectid,
+                        ObjectGuid = currentAddress.objectguid,
+                        Text = currentAddress.name,
+                        ObjectLevel = getObjLevel(hierarchy.objectid),
+                        ObjectLevelText = getObjLevelText(hierarchy.objectid)
+                    });
+                }
+            }
+
+            addresses.Reverse();
+
+            return addresses;
+        }
+
+        public bool checkIsCorrectAddress(Guid? addressId)
+        {
+            if (addressId == null)
+            {
+                return true;
+            }
+
+            AsAddrObj firstCheck = _dbContext.as_addr_obj.FirstOrDefault(h => h.objectguid == addressId);
+            if (firstCheck != null)
+            {
+                return true;
+            }
+
+            AsHouses secondCheck = _dbContext.as_houses.FirstOrDefault(ho => ho.objectguid == addressId);
+            if (secondCheck != null)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
