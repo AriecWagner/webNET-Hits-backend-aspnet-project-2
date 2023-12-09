@@ -16,7 +16,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext = context;
             _userService = userService;
         }
-        private string GenerateToken(InputUserRegisterModel userModel, AuthOptions authentification)
+        public string GenerateToken(InputUserRegisterModel userModel, AuthOptions authentification)
         {
             var newUser = _userService.RegisterUser(userModel);
 

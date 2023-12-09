@@ -16,10 +16,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
     {
         private readonly UsersService _userService;
         private readonly IConfiguration _configuration;
-        public UsersController(IConfiguration configuration, UsersService userService)
+        private readonly TokenService _tokenService;
+        public UsersController(IConfiguration configuration, UsersService userService, TokenService tokenService)
         {
             _configuration = configuration;
             _userService = userService;
+            _tokenService = tokenService;
         }
 
         [HttpPost("register")]
@@ -72,7 +74,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 }
 
                 AuthOptions authentification = new AuthOptions(_configuration);
-                var token = GenerateToken(user, authentification);
+                var token = _tokenService.GenerateToken(user, authentification);
 
                 if (token == null)
                 {
@@ -117,7 +119,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 AuthOptions authentification = new AuthOptions(_configuration);
 
-                var token = GenerateToken(user, authentification);
+                var token = _tokenService.GenerateToken(user, authentification);
 
                 if (token == null)
                 {
@@ -153,7 +155,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 }
 
                 // Аннулирование токена для пользователя (в вашем методе сервиса)
-                _userService.RevokeToken(userId);
+                _tokenService.RevokeToken(userId);
 
                 return Ok("Выход успешно выполнен");
             }
