@@ -57,5 +57,24 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext.SaveChanges();
         }
 
+
+        public bool CommentAlreadyDeleted(Guid commentId)
+        {
+            var answer = _dbContext.Comments.FirstOrDefault(item => item.Id == commentId);
+
+            if (answer.DeleteDate != null) { return true; }
+            else { return false; }
+        }
+
+        public void EditComment(string content, Guid commentId)
+        {
+            CommentModel currentComment = _dbContext.Comments.FirstOrDefault(c => c.Id == commentId);
+
+            currentComment.Content = content;
+            currentComment.ModifiedDate = DateTime.UtcNow;
+
+            _dbContext.Comments.Update(currentComment);
+            _dbContext.SaveChanges();
+        }
     }
 }
