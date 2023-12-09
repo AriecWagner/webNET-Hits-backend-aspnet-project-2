@@ -31,6 +31,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         {
             try
             {
+                if (User.Identity.IsAuthenticated)
+                {
+                    return BadRequest("Вы уже авторизованы.");
+                }
+
                 if (!_userService.FUllNameIsValid(user.FullName))
                 {
                     return BadRequest("Вы либо из Казахстана, либо принц, либо неправильно написали ФИО");
@@ -59,6 +64,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 if (!_userService.PhoneNumberIsValid(user.PhoneNumber))
                 {
                     return BadRequest("Что это за номерок у вас интересный?");
+                }
+
+                if (_userService.EmailExists(user.Email))
+                {
+                    return BadRequest("К великому сожалению, пользователь с таким email уже существует");
                 }
 
                 AuthOptions authentification = new AuthOptions(_configuration);
@@ -233,6 +243,79 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
+        [HttpPut("profile")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult EditProfile([FromBody] UserProfileEditModel userProfileModel)
+        {
+            try
+            {
+                // Получение идентификатора пользователя из токена
+                var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    if (errorMessage == "Вы не авторизованы")
+                    {
+                        return Unauthorized(new { errorMessage });
+                    }
+                    else if (errorMessage == "Мы не нашли такого пользователя")
+                    {
+                        return NotFound(new { errorMessage });
+                    }
+                }
+
+                if (!_userService.EmailIsValid(userProfileModel.Email))
+                {
+                    return BadRequest("Вы неправильно ввели email");
+                }
+
+                if (_userService.EmailForEditExists(userProfileModel.Email, userId))
+                {
+                    return BadRequest("К великому сожалению, пользователь с таким email уже существует");
+                }
+
+                if (!_userService.FUllNameIsValid(userProfileModel.FullName))
+                {
+                    return BadRequest("Вы либо из Казахстана, либо принц, либо неправильно написали ФИО");
+                }
+
+                if (!_userService.BirthDateIsValid(userProfileModel.BirthDate))
+                {
+                    return BadRequest("Вы или слишком юны или слишком стары");
+                }
+
+                if (!_userService.GenderIsValid(userProfileModel.Gender))
+                {
+                    return BadRequest("Есть только два гендера");
+                }
+
+                if (!_userService.PhoneNumberIsValid(userProfileModel.PhoneNumber))
+                {
+                    return BadRequest("Что это за номерок у вас интересный?");
+                }
+
+
+                // Редактирование профиля пользователя (в методе сервиса)
+                var result = _userService.EditUserProfile(userId, userProfileModel);
+
+                if (result)
+                {
+                    return Ok("Профиль успешно обновлен");
+                }
+                else
+                {
+                    return BadRequest("Не удалось обновить профиль пользователя.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера" + "\n" + ex.ToString());
             }
         }
     }

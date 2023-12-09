@@ -78,6 +78,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             }
         }
 
+        public bool EmailExists(string email)
+        {
+            return _dbContext.Users.Any(user => user.Email == email);
+        }
+
+        public bool EmailForEditExists(string email, Guid userId)
+        {
+            return _dbContext.Users.Any(user => user.Email == email && user.Id != userId);
+        }
+
         public bool BirthDateIsValid(DateTime date)
         {
             // Проверка, что пользователь старше 14 лет и младше 130 лет от текущей даты
@@ -249,6 +259,34 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         public UserData GetUser(Guid userId)
         {
             return _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+        }
+
+        public bool EditUserProfile(Guid userId, UserProfileEditModel userProfileModel)
+        {
+            // Получение пользователя из базы данных по userId
+            var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                // Пользователь не найден
+                return false;
+            }
+
+            // Обновление данных профиля
+            user.Email = userProfileModel.Email;
+            user.FullName = userProfileModel.FullName;
+            if (userProfileModel.BirthDate != null)
+            {
+                user.BirthDate = DateTime.SpecifyKind(userProfileModel.BirthDate, DateTimeKind.Utc);
+            }
+            user.Gender = userProfileModel.Gender;
+            user.PhoneNumber = ConvertPhoneNumberToDatabaseFormat(userProfileModel.PhoneNumber);
+
+            // Сохранение изменений в базе данных
+            _dbContext.Users.Update(user);
+            _dbContext.SaveChanges();
+
+            return true;
         }
     }
 
