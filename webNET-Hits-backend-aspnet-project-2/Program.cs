@@ -67,6 +67,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<AuthOptions>();
 builder.Services.AddScoped<AddressService>();
 builder.Services.AddScoped<TagService>();
+builder.Services.AddScoped<AuthorService>();
 
 
 builder.Services.AddMvc().AddJsonOptions(opts => {
