@@ -12,6 +12,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TagPostJoin> TagsPostsJoinTable { get; set; }
         public DbSet<LikeModel> Likes { get; set; }
+        public DbSet<CommunityModel> Communities { get; set; }
+        public DbSet<CommunityMember> CommunityMembers { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {

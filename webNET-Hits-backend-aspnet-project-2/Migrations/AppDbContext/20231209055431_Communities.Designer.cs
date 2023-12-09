@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using webNET_Hits_backend_aspnet_project_2.Data;
@@ -11,9 +12,11 @@ using webNET_Hits_backend_aspnet_project_2.Data;
 namespace webNET_Hits_backend_aspnet_project_2.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231209055431_Communities")]
+    partial class Communities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,31 +24,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("webNET_Hits_backend_aspnet_project_2.Models.DbModels.CommunityMember", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CommunityId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreateTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("CommunityRole");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CommunityMembers");
-                });
 
             modelBuilder.Entity("webNET_Hits_backend_aspnet_project_2.Models.DbModels.CommunityModel", b =>
                 {
