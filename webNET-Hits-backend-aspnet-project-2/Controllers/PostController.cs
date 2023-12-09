@@ -3,6 +3,8 @@ using webNET_Hits_backend_aspnet_project_2.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
+using System.IO;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
 {
@@ -23,6 +25,68 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _userService = userService;
             _addressService = addressService;
             _tagService = tagService;
+        }
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> GetPosts(
+            [FromQuery] List<Guid>? tags,
+            [FromQuery] string? pathOfAuthor,
+            [FromQuery] int? minRead,
+            [FromQuery] int? maxRead,
+            [FromQuery] PostSorting? sorting,
+            [FromQuery] bool? onlyMyCommunities,
+            [FromQuery] int page = 1,
+            [FromQuery] int size = 5)
+        {
+            try
+            {
+                Guid? userId;
+
+                string nameIdentifier = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (nameIdentifier != null)
+                {
+                    userId = Guid.Parse(nameIdentifier);
+                }
+                else
+                {
+                    userId = null;
+                }
+
+                FilterOptions filterOptions = new FilterOptions
+                {
+                    Tags = tags,
+                    PathOfAuthor = pathOfAuthor,
+                    minRead = minRead,
+                    maxRead = maxRead,
+                    Sorting = sorting,
+                    OnlyMyCommunities = onlyMyCommunities,
+                    Page = page,
+                    Size = size
+                };
+
+                var result = _postService.GetListOfAvaliblePosts(filterOptions, userId);
+                var structResult = new
+                {
+                    Posts = result.Item1,
+                    Pagination = result.Item2
+                };
+                return Ok(structResult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
         }
 
         [HttpPost]
@@ -70,6 +134,49 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 _postService.CreatePersonalUserPost(userPost, userId);
                 return Ok("Пост успешно создан");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> GetPosts(Guid id)
+        {
+            try
+            {
+                Guid? userId;
+
+                string nameIdentifier = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (nameIdentifier != null)
+                {
+                    userId = Guid.Parse(nameIdentifier);
+                }
+                else
+                {
+                    userId = null;
+                }
+
+                var result = _postService.GetConcretePost(id, userId);
+                var megaResult = new
+                {
+                    Comments = result.Item1,
+                    Posts = result.Item2
+                };
+
+                return Ok(megaResult);
             }
             catch (Exception ex)
             {
