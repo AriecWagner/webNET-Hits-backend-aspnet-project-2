@@ -32,24 +32,50 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _tagService = tagService;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public IActionResult GetInformationAboutCommunity(Guid id)
+        public IActionResult GetCommunties()
         {
             try
             {
-                var community = _communityService.GetCommunityDTO(id);
+                var communities = _communityService.GetCommunities();
 
-                if (community != null)
+                if (communities != null)
                 {
-                    return Ok(community);
+                    return Ok(communities);
                 }
                 else
                 {
                     return NotFound("Что-то пошло не так");
                 }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetUsCommunyList()
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                return Ok(_communityService.GetMembershipsUser(userId));
             }
             catch (Exception ex)
             {

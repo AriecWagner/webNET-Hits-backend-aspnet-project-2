@@ -170,5 +170,44 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return (posts, pagination);
         }
 
+        public List<CommunityMemberDTO> GetMembershipsUser(Guid userId)
+        {
+            List<CommunityMember> MembershipsUser = _dbContext.CommunityMembers.Where(c => c.UserId == userId).ToList();
+
+            List<CommunityMemberDTO> answer = MembershipsUser
+                .Select(MembershipsUser => new CommunityMemberDTO
+                {
+                    CommunityId = MembershipsUser.CommunityId,
+                    UserId = userId,
+                    Role = MembershipsUser.Role
+                })
+                .ToList();
+
+            return answer;
+        }
+
+        public List<CommuniesDTO> GetCommunities()
+        {
+            List<CommunityModel> communities = _dbContext.Communities.ToList();
+            List<CommuniesDTO> result = new List<CommuniesDTO>();
+
+            foreach (var community in communities)
+            {
+                CommuniesDTO communiesDTO = new CommuniesDTO
+                {
+                    Name = community.Name,
+                    Description = community.Description,
+                    IsClosed = community.IsClosed,
+                    SubscribersCount = GetSubscribersCount(community.Id),
+                    Id = community.Id,
+                    CreateTime = community.CreateTime,
+                };
+
+                result.Add(communiesDTO);
+            }
+
+            return result;
+        }
+
     }
 }
