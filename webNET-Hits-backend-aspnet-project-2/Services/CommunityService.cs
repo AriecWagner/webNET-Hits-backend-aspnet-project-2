@@ -15,7 +15,52 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             _dbContext = context;
         }
-        
-       
+
+        public bool CheckCommunityExesists(Guid communityId)
+        {
+            var answer = _dbContext.Communities.FirstOrDefault(item => item.Id == communityId);
+
+            if (answer != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool CheckOpenityOfCommunity(Guid communityId)
+        {
+            return _dbContext.Communities.FirstOrDefault(item => item.Id == communityId).IsClosed;
+        }
+
+        public bool CheckMembershipInCommunity(Guid userId, Guid communityId)
+        {
+            var answer = _dbContext.CommunityMembers.FirstOrDefault(item => item.UserId == userId && item.CommunityId == communityId);
+
+            if (answer == null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void SubscribeToCommunityAsUser(Guid userId, Guid communityId)
+        {
+            CommunityMember newMember = new CommunityMember
+            {
+                Id = new Guid(),
+                UserId = userId,
+                CommunityId = communityId,
+                Role = CommunityRole.Subscriber
+            };
+
+            _dbContext.CommunityMembers.Add(newMember);
+            _dbContext.SaveChanges();
+        }
     }
 }

@@ -31,5 +31,57 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _tagService = tagService;
         }
 
+        [HttpPost("{id}/subscribe")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> SubscribeToCommunAsUs(Guid id)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                if (id == null)
+                {
+                    return BadRequest("А где community?");
+                }
+
+                if (!_communityService.CheckCommunityExesists(id))
+                {
+                    return BadRequest("Такой группы не существует, дружок");
+                }
+
+                if (_communityService.CheckOpenityOfCommunity(id))
+                {
+                    return BadRequest("Это не для таких как ты");
+                }
+
+                if (_communityService.CheckMembershipInCommunity(userId, id))
+                {
+                    return BadRequest("Вы уже состоите в этом сообществе");
+                }
+
+                _communityService.SubscribeToCommunityAsUser(userId, id);
+                return Ok("Вы успешно подписаны");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
+        }
     }
 }
