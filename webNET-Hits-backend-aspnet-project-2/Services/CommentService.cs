@@ -14,6 +14,35 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext = context;
         }
 
+        public List<CommentsDTO> GetAllNestedComments(Guid commentId)
+        {
+            List<CommentsDTO> commentsDTOs = new List<CommentsDTO>();
+            List<CommentModel> children = GetChildrenId(commentId);
+
+            foreach (CommentModel child in children)
+            {
+                CommentsDTO elementOfCommentsDTOs = new CommentsDTO
+                {
+                    Content = child.Content,
+                    ModifiedDate = child.ModifiedDate,
+                    DeleteDate = child.DeleteDate,
+                    AuthorId = child.AuthorId,
+                    Author = _dbContext.Users.FirstOrDefault(c => c.Id == child.AuthorId).FullName,
+                    SubComments = _dbContext.Comments.Count(c => c.ParentId == child.Id),
+                    Id = child.Id,
+                    CreateTime = child.CreateTime,
+                };
+
+                commentsDTOs.Add(elementOfCommentsDTOs);
+            }
+
+            return commentsDTOs;
+        }
+
+        public List<CommentModel> GetChildrenId(Guid commentId)
+        {
+            return _dbContext.Comments.Where(item => item.ParentId == commentId).ToList();
+        }
 
         public bool CommentExists(Guid commentId)
         {
