@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
+using backtewebNET_Hits_backend_aspnet_project_2stDevelop.Models.AnotherModels;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -36,14 +37,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return isUserMember;
         }
 
-        public List<CommuniesDTO> GetCommunities()
+        public List<CommuntiesDTO> GetCommunities()
         {
             List<CommunityModel> communities = _dbContext.Communities.ToList();
-            List<CommuniesDTO> result = new List<CommuniesDTO>();
+            List<CommuntiesDTO> result = new List<CommuntiesDTO>();
 
             foreach (var community in communities)
             {
-                CommuntiesDTO communiesDTO = new CommuntiesDTO
+                CommuntiesDTO communtiesDTO = new CommuntiesDTO
                 {
                     Name = community.Name,
                     Description = community.Description,
@@ -53,7 +54,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                     CreateTime = community.CreateTime,
                 };
 
-                result.Add(communiesDTO);
+                result.Add(communtiesDTO);
             }
 
             return result;

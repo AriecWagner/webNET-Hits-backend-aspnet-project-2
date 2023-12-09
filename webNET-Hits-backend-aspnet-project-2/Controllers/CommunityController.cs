@@ -6,7 +6,6 @@ using System.Security.Claims;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
 using webNET_Hits_backend_aspnet_project_2.Models.EnumModels;
 using webNET_Hits_backend_aspnet_project_2.Services;
-using backtestDevelop.Models.AnotherModels;
 
 //ДОБАВИТЬ ВОЗМОЖНОСТЬ ПОДПИСАТЬ, БУДУЧИ АДМИНОМ, ПОЛЬЗОВАТЕЛЯ НА ЗАКРЫТУЮ COMMUNITY
 //ДОБАВИТЬ ВОЗМОЖНОСТЬ СОЗДАТЬ СВОЮ COMMUNITY
