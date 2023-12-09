@@ -17,6 +17,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         {
             _addressService = addressService;
         }
+
+        [HttpGet("search")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult Search(int parentObjectId, string? query)
+        {
+            try
+            {
+                var response = _addressService.SearchAddress(parentObjectId, query);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера " + ex.ToString());
+            }
+        }
     }
 
 }
