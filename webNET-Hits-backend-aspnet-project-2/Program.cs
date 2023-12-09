@@ -66,6 +66,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<AuthOptions>();
 builder.Services.AddScoped<AddressService>();
+builder.Services.AddScoped<TagService>();
 
 
 builder.Services.AddMvc().AddJsonOptions(opts => {
