@@ -1,5 +1,9 @@
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using webNET_Hits_backend_aspnet_project_2;
 using webNET_Hits_backend_aspnet_project_2.Services;
 

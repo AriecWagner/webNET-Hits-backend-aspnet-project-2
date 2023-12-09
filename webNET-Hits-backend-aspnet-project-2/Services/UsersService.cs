@@ -150,5 +150,33 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             return cleanedPhoneNumber;
         }
+
+        public void CreateOrUpdateTokenInfo(Guid UserId, string token)
+        {
+            TokenModel tokenInfo = _dbContext.Tokens.FirstOrDefault(x => x.UserId == UserId);
+
+            if (tokenInfo == null)
+            {
+                tokenInfo = new TokenModel
+                {
+                    UserId = UserId,
+                    Token = token,
+                    CreateTime = DateTime.UtcNow,
+                    IsValid = true,
+                };
+
+                _dbContext.Tokens.Add(tokenInfo);
+                _dbContext.SaveChanges();
+            }
+            else
+            {
+                tokenInfo.Token = token;
+                tokenInfo.CreateTime = DateTime.UtcNow;
+                tokenInfo.IsValid = true;
+
+                _dbContext.Tokens.Update(tokenInfo);
+                _dbContext.SaveChanges();
+            }
+        }
     }
 }
