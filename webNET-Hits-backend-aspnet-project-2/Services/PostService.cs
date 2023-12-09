@@ -27,5 +27,13 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext.Likes.Add(newLike);
             _dbContext.SaveChanges();
         }
+
+        public void DeleteLikeFromPost(Guid userId, Guid postId)
+        {
+            LikeModel currentLike = _dbContext.Likes.FirstOrDefault(i => i.UserId == userId && i.PostId == postId);
+
+            _dbContext.Likes.Remove(currentLike);
+            _dbContext.SaveChanges();
+        }
     }
 }
