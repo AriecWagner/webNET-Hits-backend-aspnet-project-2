@@ -147,6 +147,49 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> GetPosts(Guid id)
+        {
+            try
+            {
+                Guid? userId;
+
+                string nameIdentifier = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (nameIdentifier != null)
+                {
+                    userId = Guid.Parse(nameIdentifier);
+                }
+                else
+                {
+                    userId = null;
+                }
+
+                var result = _postService.GetConcretePost(id, userId);
+                var megaResult = new
+                {
+                    Comments = result.Item1,
+                    Posts = result.Item2
+                };
+
+                return Ok(megaResult);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
+        }
+
         [HttpPost("{postId}/like")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]

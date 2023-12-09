@@ -213,6 +213,53 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return fullPost;
         }
 
+        public (List<CommentsDTO>, PostsDTO) GetConcretePost(Guid PostId, Guid? userId)
+        {
+            var post = _dbContext.Posts.FirstOrDefault(c => c.Id == PostId);
+
+            PostsDTO postWithConcrete = new PostsDTO
+            {
+                Id = post.Id,
+                CreateTime = post.CreateTime,
+                Title = post.Title,
+                Description = post.Description,
+                ReadingTime = post.ReadingTime,
+                Image = post.Image,
+                AuthorId = post.AuthorId,
+                AuthorName = _dbContext.Users.FirstOrDefault(u => u.Id == post.AuthorId).FullName,
+                CommunityId = post.CommunityId,
+                CommunityName = post.CommunityId != null ? _dbContext.Communities.FirstOrDefault(c => c.Id == post.CommunityId).Name : null,
+                AddressId = post.AddressId,
+                Likes = _dbContext.Likes.Count(like => like.PostId == post.Id),
+                HasLike = _dbContext.Likes.Any(like => like.PostId == post.Id && like.UserId == userId),
+                CommentsCount = _dbContext.Comments.Count(comment => comment.PostId == post.Id),
+                Tags = _dbContext.TagsPostsJoinTable
+                    .Where(tagJoin => tagJoin.PostId == post.Id)
+                    .Join(_dbContext.Tags,
+                          tagJoin => tagJoin.TagId,
+                          tag => tag.Id,
+                          (tagJoin, tag) => tag)
+                    .ToList()
+            };
+
+            List<CommentModel> comments = _dbContext.Comments.Where(c => c.PostId == PostId).ToList();
+            List<CommentsDTO> commentsDTO = comments
+                .Select(comments => new CommentsDTO
+                {
+                    Content = comments.Content,
+                    ModifiedDate = comments.ModifiedDate,
+                    DeleteDate = comments.DeleteDate,
+                    AuthorId = comments.AuthorId,
+                    Author = _dbContext.Users.FirstOrDefault(c => c.Id == comments.AuthorId).FullName,
+                    SubComments = _dbContext.Comments.Count(c => c.ParentId == comments.Id),
+                    Id = comments.Id,
+                    CreateTime = comments.CreateTime,
+                })
+                .ToList();
+
+            return (commentsDTO, postWithConcrete);
+        }
+
         public void AddLikeToPost(Guid userId, Guid postId)
         {
             LikeModel newLike = new LikeModel
