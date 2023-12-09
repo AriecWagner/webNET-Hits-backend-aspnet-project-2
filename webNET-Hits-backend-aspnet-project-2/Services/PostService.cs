@@ -15,7 +15,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             _dbContext = context;
         }
-
         public PostData? CreatePersonalUserPost(CreatePostModel post, Guid authorId)
         {
             Guid postId = Guid.NewGuid();
@@ -54,5 +53,25 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return fullPost;
         }
 
+        public void AddLikeToPost(Guid userId, Guid postId)
+        {
+            LikeModel newLike = new LikeModel
+            {
+                Id = new Guid(),
+                UserId = userId,
+                PostId = postId
+            };
+
+            _dbContext.Likes.Add(newLike);
+            _dbContext.SaveChanges();
+        }
+
+        public void DeleteLikeFromPost(Guid userId, Guid postId)
+        {
+            LikeModel currentLike = _dbContext.Likes.FirstOrDefault(i => i.UserId == userId && i.PostId == postId);
+
+            _dbContext.Likes.Remove(currentLike);
+            _dbContext.SaveChanges();
+        }
     }
 }
