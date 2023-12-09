@@ -12,5 +12,13 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             _dbContext = context;
         }
+
+        public bool CommentExists(Guid commentId)
+        {
+            var answer = _dbContext.Comments.FirstOrDefault(item => item.Id == commentId);
+
+            if (answer != null) { return true; }
+            else { return false; }
+        }
     }
 }
