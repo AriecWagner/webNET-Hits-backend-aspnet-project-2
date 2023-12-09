@@ -8,6 +8,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Data
     {
         public DbSet<UserData> Users { get; set; }
         public DbSet<PasswordModel> UserPasswords { get; set; }
+        public DbSet<TokenModel> Tokens { get; set; }
         public DbSet<PostData> Posts { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TagPostJoin> TagsPostsJoinTable { get; set; }
