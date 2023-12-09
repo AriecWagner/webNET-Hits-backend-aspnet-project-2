@@ -15,6 +15,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext = context;
         }
 
-        
+        public void AddLikeToPost(Guid userId, Guid postId)
+        {
+            LikeModel newLike = new LikeModel
+            {
+                Id = new Guid(),
+                UserId = userId,
+                PostId = postId
+            };
+
+            _dbContext.Likes.Add(newLike);
+            _dbContext.SaveChanges();
+        }
     }
 }
