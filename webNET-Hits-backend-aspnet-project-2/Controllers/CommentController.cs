@@ -25,6 +25,35 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _commentService = commentService;
         }
 
+        [HttpGet("comment/{id}/tree")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> GetCommentsTree(Guid id)
+        {
+            try
+            {
+                if (!_commentService.CommentExists(id))
+                {
+                    return BadRequest("Такого коммента не существует");
+                }
+
+                _commentService.GetAllNestedComments(id);
+                return Ok("Комментарий успешно написан");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
+        }
+
         [HttpPost("/api/post/{id}/comment")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
