@@ -32,6 +32,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 return StatusCode(500, "Произошла ошибка сервера " + ex.ToString());
             }
         }
+
+        [HttpGet("chain")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult SearchChain(string objectGuid)
+        {
+            try
+            {
+                var response = _addressService.SearchAddressChain(Guid.Parse(objectGuid));
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера " + ex.ToString());
+            }
+        }
     }
 
 }
