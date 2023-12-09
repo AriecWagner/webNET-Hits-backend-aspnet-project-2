@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using webNET_Hits_backend_aspnet_project_2.Migrations;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -112,6 +116,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             };
 
             _dbContext.CommunityMembers.Add(newMember);
+            _dbContext.SaveChanges();
+        }
+
+        public void UnsubscribeFromCommunityAsUser(Guid userId, Guid communityId)
+        {
+            CommunityMember currentMember = _dbContext.CommunityMembers.FirstOrDefault(i => i.UserId == userId && i.CommunityId == communityId);
+
+            _dbContext.CommunityMembers.Remove(currentMember);
             _dbContext.SaveChanges();
         }
     }
