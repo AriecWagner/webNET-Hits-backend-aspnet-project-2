@@ -105,5 +105,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext.Comments.Update(currentComment);
             _dbContext.SaveChanges();
         }
+
+        public void DeleteComment(Guid commentId)
+        {
+            CommentModel currentComment = _dbContext.Comments.FirstOrDefault(c => c.Id == commentId);
+
+            currentComment.Content = "";
+            currentComment.DeleteDate = DateTime.UtcNow;
+
+            _dbContext.Comments.Update(currentComment);
+            _dbContext.SaveChanges();
+        }
     }
 }
