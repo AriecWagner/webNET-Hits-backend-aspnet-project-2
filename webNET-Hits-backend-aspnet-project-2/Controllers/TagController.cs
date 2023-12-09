@@ -18,6 +18,29 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _tagService = tagService;
         }
 
-        
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetProfile()
+        {
+            try
+            {
+                var tags = _tagService.GetTags();
+
+                if (tags != null)
+                {
+                    return Ok(tags);
+                }
+                else
+                {
+                    return NotFound("Что-то пошло не так");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
     }
 }

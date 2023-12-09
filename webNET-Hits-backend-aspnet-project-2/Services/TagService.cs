@@ -14,6 +14,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _dbContext = context;
         }
 
-        
+        public List<Tag> GetTags()
+        {
+            return _dbContext.Tags.ToList();
+        }
+
+
     }
 }
