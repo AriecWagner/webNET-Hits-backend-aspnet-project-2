@@ -162,5 +162,48 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 throw;
             }
         }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public async Task<IActionResult> DeleteComment(Guid id)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                if (!_commentService.CommentExists(id))
+                {
+                    return BadRequest("Такого комментария не существует");
+                }
+
+                if (_commentService.CommentAlreadyDeleted(id))
+                {
+                    return BadRequest("Нельзя удалить то, чего нет");
+                }
+
+                _commentService.DeleteComment(id);
+                return Ok("Комментарий успешно удалён");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
+                // Добавьте другие сведения о исключении при необходимости
+                throw;
+            }
+        }
     }
 }
