@@ -70,6 +70,8 @@ builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<CommunityService>();
+
 
 
 builder.Services.AddMvc().AddJsonOptions(opts => {
