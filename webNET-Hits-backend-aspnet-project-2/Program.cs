@@ -50,27 +50,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        // ��������, ����� �� �������������� �������� ��� ��������� ������
         ValidateIssuer = true,
-        // ������, �������������� ��������
         ValidIssuer = AuthOptions.ISSUER,
 
-        // ����� �� �������������� ����������� ������
         ValidateAudience = true,
-        // ��������� ����������� ������
         ValidAudience = AuthOptions.AUDIENCE,
-        // ����� �� �������������� ����� �������������
+
         ValidateLifetime = true,
 
-        // ��������� ����� ������������
         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-        // ��������� ����� ������������
         ValidateIssuerSigningKey = true,
     };
 });
 
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<AuthOptions>();
+builder.Services.AddScoped<AddressService>();
+
 
 builder.Services.AddMvc().AddJsonOptions(opts => {
     var enumConverter = new JsonStringEnumConverter(); opts.JsonSerializerOptions.Converters.Add(enumConverter);
