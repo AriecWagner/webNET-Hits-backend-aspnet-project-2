@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace backtewebNET_Hits_backend_aspnet_project_2stDevelop.Models.AnotherModels
+
 {
     public class CommunityDTO
     {
