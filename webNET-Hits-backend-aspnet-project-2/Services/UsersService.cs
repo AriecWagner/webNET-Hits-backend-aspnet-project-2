@@ -178,5 +178,29 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 _dbContext.SaveChanges();
             }
         }
+
+        public UserData Authenticate(string email, string password)
+        {
+            UserData user = _dbContext.Users.SingleOrDefault(currentUser => currentUser.Email == email);
+
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            PasswordModel userHashedPassword = _dbContext.UserPasswords.SingleOrDefault(currentUser => currentUser.UserId == user.Id);
+
+            if (userHashedPassword == null)
+            {
+                return null;
+            }
+            else if (!VerifyPassword(password, userHashedPassword.HashedPassword))
+            {
+                return null;
+            }
+
+            return user;
+        }
     }
 }

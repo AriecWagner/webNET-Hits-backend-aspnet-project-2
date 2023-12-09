@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
+
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
 {
     [ApiController]
@@ -26,42 +27,42 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> Register([FromBody] InputUserRegisterModel userModel)
+        public async Task<IActionResult> Register([FromBody] InputUserRegisterModel user)
         {
             try
             {
-                if (!_userService.FUllNameIsValid(userModel.FullName))
+                if (!_userService.FUllNameIsValid(user.FullName))
                 {
                     return BadRequest("Вы либо из Казахстана, либо принц, либо неправильно написали ФИО");
                 }
 
-                if (!_userService.PasswordIsValid(userModel.Password, out var errorMessage))
+                if (!_userService.PasswordIsValid(user.Password, out var errorMessage))
                 {
                     return BadRequest(new { Message = errorMessage });
                 }
 
-                if (!_userService.EmailIsValid(userModel.Email))
+                if (!_userService.EmailIsValid(user.Email))
                 {
                     return BadRequest("Вы неправильно ввели email");
                 }
 
-                if (!_userService.BirthDateIsValid(userModel.BirthDate))
+                if (!_userService.BirthDateIsValid(user.BirthDate))
                 {
                     return BadRequest("Вы или слишком юны или слишком стары");
                 }
 
-                if (!_userService.GenderIsValid(userModel.Gender))
+                if (!_userService.GenderIsValid(user.Gender))
                 {
                     return BadRequest("Есть только два гендера");
                 }
 
-                if (!_userService.PhoneNumberIsValid(userModel.PhoneNumber))
+                if (!_userService.PhoneNumberIsValid(user.PhoneNumber))
                 {
                     return BadRequest("Что это за номерок у вас интересный?");
                 }
 
                 AuthOptions authentification = new AuthOptions(_configuration);
-                var token = GenerateToken(userModel, authentification);
+                var token = GenerateToken(user, authentification);
 
                 if (token == null)
                 {
@@ -112,6 +113,43 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             return encodedJwt;
         }
 
+        [HttpPost("login")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult Login([FromBody] UserLoginModel model)
+        {
+            try
+            {
+                if (User.Identity.IsAuthenticated)
+                {
+                    return BadRequest("Вы уже авторизованы.");
+                }
 
+                UserData user = _userService.Authenticate(model.Email, model.Password);
+
+                if (user == null)
+                {
+                    return BadRequest("Данные неверны");
+                }
+
+                AuthOptions authentification = new AuthOptions(_configuration);
+
+                var token = GenerateToken(user, authentification);
+
+                if (token == null)
+                {
+                    return BadRequest(new { Error = "Не удалось зарегестрировать пользователя" });
+                }
+
+                return Ok(new { token = token });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера" + "\n" + ex.ToString());
+            }
+        }
     }
 }
