@@ -32,6 +32,57 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _tagService = tagService;
         }
 
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetCommunties()
+        {
+            try
+            {
+                var communities = _communityService.GetCommunities();
+
+                if (communities != null)
+                {
+                    return Ok(communities);
+                }
+                else
+                {
+                    return NotFound("Что-то пошло не так");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
+        [HttpGet("my")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetUsCommunyList()
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                return Ok(_communityService.GetMembershipsUser(userId));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -98,6 +149,32 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     Pagination = result.Item2
                 };
                 return Ok(structResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Произошла ошибка сервера");
+            }
+        }
+
+        [HttpGet("{id}/role")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
+        public IActionResult GetGreatestUsRole(Guid id)
+        {
+            try
+            {
+                Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+
+                if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
+                {
+                    return BadRequest(new { errorMessage });
+                }
+
+                return Ok(_communityService.GetTheGreatestRole(id, userId));
             }
             catch (Exception ex)
             {
