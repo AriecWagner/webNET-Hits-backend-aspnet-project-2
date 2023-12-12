@@ -242,7 +242,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                     .ToList()
             };
 
-            List<CommentModel> comments = _dbContext.Comments.Where(c => c.PostId == PostId).ToList();
+            List<CommentModel> comments = _dbContext.Comments.Where(c => c.ParentId == PostId).ToList();
             List<CommentsDTO> commentsDTO = comments
                 .Select(comments => new CommentsDTO
                 {
@@ -284,6 +284,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         public bool PostExests(Guid postId)
         {
             var answer = _dbContext.Posts.FirstOrDefault(item => item.Id == postId);
+
+            if (answer != null) { return true; }
+            else { return false; }
+        }
+
+        public bool UserHasLikeOnPost (Guid userId, Guid postId)
+        {
+            var answer = _dbContext.Likes.FirstOrDefault(item => item.PostId == postId && item.UserId == userId);
 
             if (answer != null) { return true; }
             else { return false; }

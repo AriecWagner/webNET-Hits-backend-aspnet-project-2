@@ -1,26 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using webNET_Hits_backend_aspnet_project_2.Data;
 using webNET_Hits_backend_aspnet_project_2.Models.DbModels;
-using webNET_Hits_backend_aspnet_project_2.Models.InputModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authorization;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public class TokenService
     {
-        private readonly UsersService _userService;
         readonly AppDbContext _dbContext;
-        public TokenService(AppDbContext context, UsersService userService)
+        public TokenService(AppDbContext context)
         {
             _dbContext = context;
-            _userService = userService;
         }
         public string GenerateToken(Guid userId, AuthOptions authentification)
         {

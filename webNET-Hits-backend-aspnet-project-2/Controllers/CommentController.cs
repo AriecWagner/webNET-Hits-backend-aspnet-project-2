@@ -39,8 +39,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     return BadRequest("Такого коммента не существует");
                 }
 
-                _commentService.GetAllNestedComments(id);
-                return Ok("Комментарий успешно написан");
+                
+                return Ok(_commentService.GetAllNestedComments(id));
             }
             catch (Exception ex)
             {

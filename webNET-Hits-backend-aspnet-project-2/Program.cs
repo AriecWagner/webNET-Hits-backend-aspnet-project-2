@@ -68,6 +68,7 @@ builder.Services.AddScoped<AuthOptions>();
 builder.Services.AddScoped<AddressService>();
 builder.Services.AddScoped<TagService>();
 builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<CommunityService>();
@@ -93,6 +94,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

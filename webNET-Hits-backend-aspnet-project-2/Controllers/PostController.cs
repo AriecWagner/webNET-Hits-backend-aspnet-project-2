@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
 using System.IO;
+using webNET_Hits_backend_aspnet_project_2.Migrations;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
 {
@@ -152,7 +153,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
-        public async Task<IActionResult> GetPosts(Guid id)
+        public async Task<IActionResult> GetPost(Guid id)
         {
             try
             {
@@ -167,6 +168,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 else
                 {
                     userId = null;
+                }
+
+                if (!_postService.PostExests(id))
+                {
+                    return NotFound("Такого поста не существует");
                 }
 
                 var result = _postService.GetConcretePost(id, userId);
@@ -208,6 +214,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     return BadRequest(new { errorMessage });
                 }
 
+                if (!_postService.PostExests(postId))
+                {
+                    return NotFound("Такого поста не существует");
+                }
+
+                if (_postService.UserHasLikeOnPost(userId, postId))
+                {
+                    return BadRequest("Пост уже лайкнут");
+                }
+
                 _postService.AddLikeToPost(userId, postId);
 
                 return Ok("Пост успешно лайкнут");
@@ -242,9 +258,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     return BadRequest(new { errorMessage });
                 }
 
+                if (!_postService.PostExests(postId))
+                {
+                    return NotFound("Такого поста не существует");
+                }
+
+                if (!_postService.UserHasLikeOnPost(userId, postId))
+                {
+                    return BadRequest("Лайк с поста уже убран");
+                }
+
                 _postService.DeleteLikeFromPost(userId, postId);
 
-                return Ok("Лвйк успешно убран");
+                return Ok("Лайк успешно убран");
             }
             catch (Exception ex)
             {
@@ -257,5 +283,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 throw;
             }
         }
+
+
     }
 }

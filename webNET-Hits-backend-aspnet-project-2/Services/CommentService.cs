@@ -59,7 +59,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public bool checkParentIsCorrect(Guid? id)
         {
-            if (id == Guid.Empty) { return true; }
+            if (id == null) { return true; }
 
             var answer = GetCommentById(id);
 
@@ -70,6 +70,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public void AddCommentToPost(CommentInput commentInput, Guid postId, Guid userId)
         {
+            commentInput.ParentId =
+                commentInput.ParentId == null ?
+                commentInput.ParentId = postId :
+                commentInput.ParentId = commentInput.ParentId;
+
             CommentModel comment = new CommentModel
             {
                 Id = new Guid(),
