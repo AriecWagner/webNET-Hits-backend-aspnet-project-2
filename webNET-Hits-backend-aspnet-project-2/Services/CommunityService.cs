@@ -297,12 +297,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             }
         }
 
-        public bool CheckOpenityOfCommunity(Guid communityId)
+        public bool CheckOpenityOfCommunity(Guid? communityId)
         {
             return _dbContext.Communities.FirstOrDefault(item => item.Id == communityId).IsClosed;
         }
 
-        public bool CheckMembershipInCommunity(Guid userId, Guid communityId)
+        public bool CheckMembershipInCommunity(Guid? userId, Guid? communityId)
         {
             var answer = _dbContext.CommunityMembers.FirstOrDefault(item => item.UserId == userId && item.CommunityId == communityId);
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 //ДОБАВИТЬ ВОЗМОЖНОСТЬ СОЗДАТЬ СВОЮ COMMUNITY
@@ -112,6 +113,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public IActionResult GetCommunityPosts(
@@ -123,11 +125,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         {
             try
             {
+                if (page < 1)
+                {
+                    return BadRequest("Извините, но числовое значение страницы может быть только натуральным числом");
+                }
+
                 Guid userId = Guid.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
 
                 if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
                 {
                     return BadRequest(new { errorMessage });
+                }
+
+                if (_communityService.CheckOpenityOfCommunity(id) && _communityService.CheckMembershipInCommunity(userId, id))
+                {
+                    return StatusCode(403, "Это не для таких как ты сделано");
                 }
 
                 FilterOptionsCommunity filterOptions = new FilterOptionsCommunity
@@ -139,7 +151,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     Size = size
                 };
 
-                var community = _communityService.GetCommunityDTO(id);
+               //var community = _communityService.GetCommunityDTO(id);
 
                 var result = _communityService.GetListOfAvalibleCommunityPosts(filterOptions, userId);
                 var structResult = new
@@ -147,6 +159,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     Posts = result.Item1,
                     Pagination = result.Item2
                 };
+
+                if (structResult.Pagination.Current > structResult.Pagination.Count)
+                {
+                    return BadRequest("Вы зашли слишком далеко");
+                }
+
+                if (structResult.Posts == null)
+                {
+                    return BadRequest("fgrgrrere");
+                }
+
                 return Ok(structResult);
             }
             catch (Exception ex)
@@ -160,6 +183,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> CreateCommunityPost([FromBody] CreatePostModel communPost, Guid id)
@@ -195,7 +219,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_communityService.CheckAdmin(userId, id))
                 {
-                    return BadRequest("Вы не являетесь админом данной группы");
+                    return StatusCode(403, "Вы не являетесь админом данной группы");
                 }
 
                 if (!_addressService.checkIsCorrectAddress(communPost.AddressId))
@@ -254,6 +278,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(string))]
         public async Task<IActionResult> SubscribeToCommunAsUs(Guid id)
@@ -274,15 +299,15 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_communityService.CheckCommunityExesists(id))
                 {
-                    return BadRequest("Такой группы не существует, дружок");
+                    return NotFound("Такой группы не существует, дружок");
                 }
 
                 if (_communityService.CheckOpenityOfCommunity(id))
                 {
-                    return BadRequest("Это не для таких как ты");
+                    return StatusCode(403, "Это не для таких как ты");
                 }
 
-                if (_communityService.CheckMembershipInCommunity(userId, id))
+                if (!_communityService.CheckMembershipInCommunity(userId, id))
                 {
                     return BadRequest("Вы уже состоите в этом сообществе");
                 }
@@ -327,10 +352,10 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_communityService.CheckCommunityExesists(id))
                 {
-                    return BadRequest("Такой группы не существует, дружок");
+                    return NotFound("Такой группы не существует, дружок");
                 }
 
-                if (!_communityService.CheckMembershipInCommunity(userId, id))
+                if (_communityService.CheckMembershipInCommunity(userId, id))
                 {
                     return BadRequest("Вы не состоите в этом сообществе, чтобы отписываться от него");
                 }

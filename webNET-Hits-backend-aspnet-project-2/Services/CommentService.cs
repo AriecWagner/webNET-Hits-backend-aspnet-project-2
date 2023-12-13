@@ -57,6 +57,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return _dbContext.Comments.FirstOrDefault(item => item.Id == id);
         }
 
+        public Guid? GetCommunityIdByCommentId (Guid commentId)
+        {
+            Guid postId = _dbContext.Comments.FirstOrDefault(i => i.Id == commentId).PostId;
+            Guid? communityId = _dbContext.Posts.FirstOrDefault(i => i.Id == postId).CommunityId;
+
+            return communityId;
+        }
+
+        public bool CheckOwnerOfComment(Guid commentId, Guid userId)
+        {
+            return _dbContext.Comments.Any(i => i.Id == commentId && i.AuthorId == userId);
+        }
+
         public bool checkParentIsCorrect(Guid? id)
         {
             if (id == null) { return true; }

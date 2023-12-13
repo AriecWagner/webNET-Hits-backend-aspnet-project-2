@@ -17,15 +17,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         private readonly UsersService _userService;
         private readonly AddressService _addressService;
         private readonly TagService _tagService;
+        private readonly CommunityService _communityService;
         private readonly IConfiguration _configuration;
 
-        public PostController(IConfiguration configuration, PostService postService, UsersService userService, AddressService addressService, TagService tagService)
+        public PostController(IConfiguration configuration, PostService postService, UsersService userService, AddressService addressService, TagService tagService, CommunityService communityService)
         {
             _configuration = configuration;
             _postService = postService;
             _userService = userService;
             _addressService = addressService;
             _tagService = tagService;
+            _communityService = communityService;
         }
 
         [HttpGet]
@@ -45,6 +47,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         {
             try
             {
+                if (page < 1)
+                {
+                    return BadRequest("Извините, но числовое значение страницы может быть только натуральным числом");
+                }
+
                 Guid? userId;
 
                 string nameIdentifier = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
@@ -76,6 +83,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     Posts = result.Item1,
                     Pagination = result.Item2
                 };
+
+                if (structResult.Pagination.Current > structResult.Pagination.Count)
+                {
+                    return BadRequest("Вы зашли слишком далеко");
+                }
+
                 return Ok(structResult);
             }
             catch (Exception ex)
@@ -214,6 +227,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     return BadRequest(new { errorMessage });
                 }
 
+                if (_communityService.CheckOpenityOfCommunity(postId) && _communityService.CheckMembershipInCommunity(userId, postId))
+                {
+                    return StatusCode(403, "Это не для таких как ты сделано");
+                }
+
                 if (!_postService.PostExests(postId))
                 {
                     return NotFound("Такого поста не существует");
@@ -256,6 +274,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 if (!_userService.IsUserAuthenticated(userId, out var errorMessage))
                 {
                     return BadRequest(new { errorMessage });
+                }
+
+                if (_communityService.CheckOpenityOfCommunity(postId) && _communityService.CheckMembershipInCommunity(userId, postId))
+                {
+                    return StatusCode(403, "Это не для таких как ты сделано");
                 }
 
                 if (!_postService.PostExests(postId))

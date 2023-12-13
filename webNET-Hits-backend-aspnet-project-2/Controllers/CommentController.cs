@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Models.AnotherModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using webNET_Hits_backend_aspnet_project_2.Migrations;
 
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
@@ -14,15 +15,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         private readonly UsersService _userService;
         private readonly CommentService _commentService;
         private readonly PostService _postService;
+        private readonly CommunityService _communityService;
         private readonly IConfiguration _configuration;
 
 
-        public CommentController(IConfiguration configuration, CommentService commentService, UsersService userService, PostService postService)
+        public CommentController(IConfiguration configuration, CommentService commentService, UsersService userService, PostService postService, CommunityService communityService)
         {
             _configuration = configuration;
             _userService = userService;
             _postService = postService;
             _commentService = commentService;
+            _communityService = communityService;
         }
 
         [HttpGet("comment/{id}/tree")]
@@ -36,10 +39,29 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             {
                 if (!_commentService.CommentExists(id))
                 {
-                    return BadRequest("Такого коммента не существует");
+                    return NotFound("Такого коммента не существует");
                 }
 
-                
+                Guid? userId;
+
+                string nameIdentifier = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+                if (nameIdentifier != null)
+                {
+                    userId = Guid.Parse(nameIdentifier);
+                }
+                else
+                {
+                    userId = null;
+                }
+
+                Guid? communityId = _commentService.GetCommunityIdByCommentId(id);
+
+                if (communityId != null && _communityService.CheckOpenityOfCommunity(communityId) && _communityService.CheckMembershipInCommunity(userId, communityId))
+                {
+                    return StatusCode(403, "Это не для таких как ты сделано");
+                }
+
                 return Ok(_commentService.GetAllNestedComments(id));
             }
             catch (Exception ex)
@@ -85,12 +107,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_postService.PostExests(id))
                 {
-                    return BadRequest("Такого поста не существует");
+                    return NotFound("Такого поста не существует");
                 }
 
                 if (!_commentService.checkParentIsCorrect(comment.ParentId))
                 {
-                    return BadRequest("Такого комментария не существует");
+                    return NotFound("Такого комментария не существует");
+                }
+
+                Guid? communityId = _commentService.GetCommunityIdByCommentId(id);
+
+                if (communityId != null && _communityService.CheckOpenityOfCommunity(communityId) && _communityService.CheckMembershipInCommunity(userId, communityId))
+                {
+                    return StatusCode(403, "НЕЕЕЕЕЛЬЗЯ");
                 }
 
                 _commentService.AddCommentToPost(comment, id, userId);
@@ -140,12 +169,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_commentService.CommentExists(id))
                 {
-                    return BadRequest("Такого комментария не существует");
+                    return NotFound("Такого комментария не существует");
                 }
 
                 if (_commentService.CommentAlreadyDeleted(id))
                 {
                     return BadRequest("Нельзя изменить то, чего нет");
+                }
+
+                if (!_commentService.CheckOwnerOfComment(id, userId))
+                {
+                    return StatusCode(403, "Так делать нехорошо");
                 }
 
                 _commentService.EditComment(comment.Content, id);
@@ -183,12 +217,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
                 if (!_commentService.CommentExists(id))
                 {
-                    return BadRequest("Такого комментария не существует");
+                    return NotFound("Такого комментария не существует");
                 }
 
                 if (_commentService.CommentAlreadyDeleted(id))
                 {
                     return BadRequest("Нельзя удалить то, чего нет");
+                }
+
+                if (!_commentService.CheckOwnerOfComment(id, userId))
+                {
+                    return StatusCode(403, "Так делать нехорошо");
                 }
 
                 _commentService.DeleteComment(id);
