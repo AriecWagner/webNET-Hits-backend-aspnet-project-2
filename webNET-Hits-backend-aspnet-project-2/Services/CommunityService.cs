@@ -299,7 +299,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public bool CheckOpenityOfCommunity(Guid? communityId)
         {
-            return _dbContext.Communities.FirstOrDefault(item => item.Id == communityId).IsClosed;
+            return _dbContext.Communities.FirstOrDefault(item => item.Id == communityId)?.IsClosed ?? false;
         }
 
         public bool CheckMembershipInCommunity(Guid? userId, Guid? communityId)

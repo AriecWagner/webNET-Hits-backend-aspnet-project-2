@@ -59,8 +59,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public Guid? GetCommunityIdByCommentId (Guid commentId)
         {
-            Guid postId = _dbContext.Comments.FirstOrDefault(i => i.Id == commentId).PostId;
-            Guid? communityId = _dbContext.Posts.FirstOrDefault(i => i.Id == postId).CommunityId;
+            Guid? postId = _dbContext.Comments.FirstOrDefault(i => i.Id == commentId)?.PostId;
+            Guid? communityId = _dbContext.Posts.FirstOrDefault(i => i.Id == postId)?.CommunityId;
 
             return communityId;
         }

@@ -83,11 +83,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                     Posts = result.Item1,
                     Pagination = result.Item2
                 };
-
+                
                 if (structResult.Pagination.Current > structResult.Pagination.Count)
                 {
                     return BadRequest("Вы зашли слишком далеко");
                 }
+                
 
                 return Ok(structResult);
             }
